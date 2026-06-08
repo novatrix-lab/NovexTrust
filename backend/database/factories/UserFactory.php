@@ -32,6 +32,7 @@ class UserFactory extends Factory
             'tenant_id' => Tenant::factory(),
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'phone' => '+9715'.fake()->numerify('########'),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'role' => UserRole::AgencyStaff,

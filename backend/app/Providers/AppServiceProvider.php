@@ -7,8 +7,11 @@ namespace App\Providers;
 use App\Extraction\Extractor;
 use App\Extraction\StubExtractor;
 use App\Notifications\Channels\EmailChannel;
+use App\Notifications\Channels\TwilioWhatsappChannel;
 use App\Notifications\Channels\WhatsappChannel;
 use App\Notifications\NotificationChannelRegistry;
+use App\Notifications\Whatsapp\TwilioWhatsappSender;
+use App\Notifications\Whatsapp\WhatsappSender;
 use App\Tenancy\TenantContext;
 use App\Vault\DocumentVault;
 use App\Vault\Kms\KeyManagementService;
@@ -16,6 +19,7 @@ use App\Vault\Kms\LocalKms;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use RuntimeException;
+use Twilio\Rest\Client as TwilioClient;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -52,12 +56,26 @@ class AppServiceProvider extends ServiceProvider
             };
         });
 
-        // Notification channels (email real, WhatsApp stub; push is a future
-        // drop-in — just register one more here).
+        // WhatsApp transport: real Twilio sender when credentials are configured.
+        $this->app->bind(WhatsappSender::class, function (): WhatsappSender {
+            return new TwilioWhatsappSender(
+                new TwilioClient(config('services.twilio.sid'), config('services.twilio.token')),
+                (string) config('services.twilio.whatsapp_from'),
+                config('services.twilio.whatsapp_content_sid'),
+            );
+        });
+
+        // Notification channels (email real; WhatsApp real via Twilio when
+        // configured, else the no-op stub; push is a future drop-in).
         $this->app->singleton(NotificationChannelRegistry::class, function ($app): NotificationChannelRegistry {
             $registry = new NotificationChannelRegistry;
             $registry->register($app->make(EmailChannel::class));
-            $registry->register($app->make(WhatsappChannel::class));
+
+            $registry->register(
+                filled(config('services.twilio.sid')) && filled(config('services.twilio.whatsapp_from'))
+                    ? $app->make(TwilioWhatsappChannel::class)
+                    : $app->make(WhatsappChannel::class),
+            );
 
             return $registry;
         });

@@ -152,10 +152,11 @@ Following the SPEC.md §12 / CLAUDE.md build order, one milestone at a time:
   `deadlines:recompute` command scheduled daily (`schedule:run` via cron);
   read-only `GET /api/deadlines`. 96 tests.
 - [x] **8. Notifications (email + WhatsApp, queued)** — `NotificationChannel`
-  interface + `EmailChannel` (real Mailable) + `WhatsappChannel` (stub) + registry
-  (push = drop-in); `AlertMessageBuilder` localizes copy (en/ar lang files) with
-  the consequence note; `alerts:send` (hourly) dispatches idempotent `SendAlert`
-  jobs recording sent/failed. 104 tests.
+  interface + `EmailChannel` (real Mailable) + **`TwilioWhatsappChannel`** (real,
+  body or approved Content template; stub fallback when unconfigured) + registry
+  (push = drop-in); `AlertMessageBuilder` localizes copy (en/ar) with the
+  consequence note; `alerts:send` (hourly) dispatches idempotent `SendAlert` jobs.
+  Channels toggled via `COMPLIANCE_ALERT_CHANNELS`.
 - [x] **9. Agency cockpit (web)** — Livewire + Tailwind (Vite build); session login;
   traffic-light dashboard (filter, mark-done, assign), entity index + drill-down,
   and **CSV bulk import** of client entities. Tenant-scoped throughout; en/ar lang

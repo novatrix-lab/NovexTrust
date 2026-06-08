@@ -37,4 +37,15 @@ return [
         ],
     ],
 
+    // WhatsApp via Twilio (M8 notification channel). When `sid` is set the real
+    // channel is used; otherwise WhatsApp falls back to the no-op stub.
+    // `whatsapp_content_sid` is an approved Twilio Content template (single {{1}}
+    // variable) for production business-initiated messages.
+    'twilio' => [
+        'sid' => env('TWILIO_SID'),
+        'token' => env('TWILIO_AUTH_TOKEN'),
+        'whatsapp_from' => env('TWILIO_WHATSAPP_FROM'),
+        'whatsapp_content_sid' => env('TWILIO_WHATSAPP_CONTENT_SID'),
+    ],
+
 ];

@@ -24,10 +24,14 @@ return [
     'alert_lead_days' => [90, 60, 30, 7, 1],
 
     /*
-    | Channels to schedule alerts on. WhatsApp is wired in M8; push is a future
-    | drop-in. Email only for now so we don't schedule unsendable rows.
+    | Channels to schedule alerts on (comma-separated env, e.g. "email,whatsapp").
+    | WhatsApp delivers via Twilio when configured (recipients need a phone on
+    | file). Push is a future drop-in. Defaults to email only.
     */
-    'alert_channels' => ['email'],
+    'alert_channels' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('COMPLIANCE_ALERT_CHANNELS', 'email'))
+    ))),
 
     /*
     |--------------------------------------------------------------------------

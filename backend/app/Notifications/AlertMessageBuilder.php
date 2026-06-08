@@ -64,7 +64,7 @@ final class AlertMessageBuilder
             body: $body,
             recipientName: $recipient?->name ?? $subjectName,
             recipientEmail: $recipient?->email,
-            recipientPhone: null, // no phone column yet; WhatsApp is stubbed
+            recipientPhone: $recipient?->phone,
             locale: $locale,
         );
     }
