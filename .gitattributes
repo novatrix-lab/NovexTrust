@@ -1,0 +1,5 @@
+# Normalise line endings. LF everywhere (so deploy/*.sh stay valid on Linux),
+# except Windows batch files which need CRLF.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.sh text eol=lf

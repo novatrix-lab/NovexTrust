@@ -1,0 +1,17 @@
+# Monorepo root ignores. The Laravel app has its own backend/.gitignore which
+# covers vendor/, node_modules/, .env, build artefacts, etc.
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# Local tooling / logs
+*.log
