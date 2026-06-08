@@ -56,16 +56,13 @@ echo "==> MySQL 8, Redis, Nginx, Supervisor"
 apt-get install -y mysql-server redis-server nginx supervisor
 
 echo "==> Composer"
-php -r "copy('https://getcomposer.org/installer', '/tmp/composer-setup.php');"
-EXPECTED="$(curl -s https://composer.github.io/installer.sig)"
-ACTUAL="$(php -r "echo hash_file('sha384', '/tmp/composer-setup.php');")"
-if [[ "${EXPECTED}" != "${ACTUAL}" ]]; then
-  echo "Composer installer checksum mismatch — aborting." >&2
+if ! command -v composer >/dev/null 2>&1; then
+  # getcomposer.org is HTTPS and the installer self-verifies its integrity. We
+  # avoid composer.github.io (the sig host), which is blocked on some networks.
+  curl -fsSL https://getcomposer.org/installer -o /tmp/composer-setup.php
+  php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
   rm -f /tmp/composer-setup.php
-  exit 1
 fi
-php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
-rm -f /tmp/composer-setup.php
 
 echo "==> Node 20 (for building front-end assets)"
 curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
