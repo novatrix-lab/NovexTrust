@@ -1,4 +1,7 @@
-# ComplyGCC *(placeholder name — SPEC.md §14)*
+# Novex Trust
+
+> *Codebase paths and internal docs still use the working name "ComplyGCC"; the
+> product brand is **Novex Trust**, read from `APP_NAME` (never hardcoded).*
 
 B2B SaaS compliance tracker for UAE businesses: tracks every recurring
 government/compliance deadline (trade licence, visas, Emirates ID, labour cards,
