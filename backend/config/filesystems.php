@@ -63,12 +63,22 @@ return [
         ],
 
         // Encrypted document vault (SPEC.md §8/§10). Stores only encrypted
-        // envelopes. Local for dev; switch to an S3-compatible disk (residency-
-        // flexible region) in production. `throw` is on so write/read failures
-        // surface loudly rather than silently dropping crown-jewel data.
+        // envelopes. One dedicated, private, fail-loud disk that switches backend
+        // via VAULT_DISK_DRIVER (local for dev → s3 in production, residency-
+        // flexible region). `throw` is on so failures surface rather than
+        // silently dropping crown-jewel data. Unused keys are ignored by the
+        // active driver.
         'vault' => [
-            'driver' => 'local',
+            'driver' => env('VAULT_DISK_DRIVER', 'local'),
+            // local driver
             'root' => storage_path('app/vault'),
+            // s3 driver (residency-flexible; e.g. ap-southeast-1 Singapore)
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION'),
+            'bucket' => env('AWS_BUCKET'),
+            'endpoint' => env('AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'visibility' => 'private',
             'throw' => true,
             'report' => false,

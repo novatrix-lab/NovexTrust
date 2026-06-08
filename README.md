@@ -22,6 +22,7 @@ complygcc/
 ├── README.md           # This file
 ├── SECURITY.md         # Security posture / review (M10)
 ├── DEPLOYMENT.md       # Fresh-server deploy guide (Ubuntu 22.04)
+├── GO-LIVE.md          # Pre-launch checklist (S3 Singapore, secrets, verify)
 ├── deploy/             # provision.sh, deploy.sh, nginx/supervisor configs, prod env
 └── backend/            # Laravel 12 API + domain core (backend-first; built now)
                         # Future: mobile/ (Flutter) reuses the same REST/JSON API
