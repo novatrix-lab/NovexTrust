@@ -33,6 +33,15 @@ echo "==> Base packages"
 apt-get update -y
 apt-get install -y software-properties-common curl git unzip ca-certificates gnupg lsb-release
 
+echo "==> Swap (prevents OOM during composer/npm/MySQL on small instances)"
+if ! swapon --show | grep -q .; then
+  fallocate -l 2G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=2048
+  chmod 600 /swapfile
+  mkswap /swapfile
+  swapon /swapfile
+  grep -q '/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+fi
+
 echo "==> PHP ${PHP_VERSION} (ondrej/php PPA — Ubuntu 22.04 default is 8.1)"
 add-apt-repository -y ppa:ondrej/php
 apt-get update -y
@@ -70,9 +79,13 @@ mysql --execute="CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8
 mysql --execute="CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';"
 mysql --execute="GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'localhost'; FLUSH PRIVILEGES;"
 
-echo "==> Application directory"
+echo "==> Application directory + permissions"
+DEPLOY_USER="${DEPLOY_USER:-ubuntu}"
 mkdir -p "${APP_DIR}"
-chown -R www-data:www-data "${APP_DIR}"
+# App owned by the deploy user (who runs composer/artisan); the web server
+# (www-data) is the group and gets write access to the runtime directories.
+chown -R "${DEPLOY_USER}:www-data" "${APP_DIR}"
+chmod -R ug+rwX "${APP_DIR}/backend/storage" "${APP_DIR}/backend/bootstrap/cache" 2>/dev/null || true
 
 echo "==> Nginx site"
 sed "s/APP_DOMAIN/${APP_DOMAIN}/g; s#APP_DIR#${APP_DIR}#g; s/PHP_VERSION/${PHP_VERSION}/g" \
