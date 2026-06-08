@@ -97,8 +97,9 @@ sed "s#APP_DIR#${APP_DIR}#g; s/PHP_VERSION/${PHP_VERSION}/g" \
 supervisorctl reread && supervisorctl update
 
 echo "==> Scheduler cron (runs as www-data)"
-( crontab -u www-data -l 2>/dev/null | grep -v 'artisan schedule:run' ; \
-  echo "* * * * * cd ${APP_DIR}/backend && php artisan schedule:run >> /dev/null 2>&1" ) \
+# `|| true` so a missing crontab / no grep match doesn't trip `set -e`.
+{ crontab -u www-data -l 2>/dev/null | grep -v 'artisan schedule:run' || true; \
+  echo "* * * * * cd ${APP_DIR}/backend && php artisan schedule:run >> /dev/null 2>&1"; } \
   | crontab -u www-data -
 
 systemctl enable --now php${PHP_VERSION}-fpm mysql redis-server nginx supervisor
