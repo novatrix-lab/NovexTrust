@@ -38,4 +38,17 @@ class TwilioWhatsappSenderTest extends TestCase
 
         (new TwilioWhatsappSender($client, 'whatsapp:+14155238886', 'HXtemplate'))->send('+971500000000', 'Hello');
     }
+
+    public function test_flattens_a_multiline_body_for_the_template_variable(): void
+    {
+        $messages = Mockery::mock();
+        $messages->shouldReceive('create')->once()->withArgs(function (string $to, array $opts): bool {
+            return ($opts['contentVariables'] ?? null) === '{"1":"Hello there - Licence due - Why: matters"}';
+        });
+        $client = Mockery::mock(Client::class);
+        $client->messages = $messages;
+
+        (new TwilioWhatsappSender($client, '+1', 'HXtemplate'))
+            ->send('+971500000000', "Hello there\n\nLicence due\n\nWhy: matters");
+    }
 }

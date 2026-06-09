@@ -30,12 +30,21 @@ final class TwilioWhatsappSender implements WhatsappSender
 
         if (!blank($this->contentSid)) {
             $options['contentSid'] = $this->contentSid;
-            $options['contentVariables'] = json_encode(['1' => $body], JSON_THROW_ON_ERROR);
+            // WhatsApp template parameters may not contain newlines (or runs of
+            // 4+ spaces), so flatten the composed message to a single line.
+            $options['contentVariables'] = json_encode(['1' => $this->flatten($body)], JSON_THROW_ON_ERROR);
         } else {
             $options['body'] = $body;
         }
 
         $this->client->messages->create($this->whatsapp($toPhone), $options);
+    }
+
+    private function flatten(string $text): string
+    {
+        $text = (string) preg_replace('/[\r\n]+/', ' - ', $text);
+
+        return trim((string) preg_replace('/ {2,}/', ' ', $text));
     }
 
     private function whatsapp(string $number): string
