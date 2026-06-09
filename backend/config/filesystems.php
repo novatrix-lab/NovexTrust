@@ -70,8 +70,9 @@ return [
         // active driver.
         'vault' => [
             'driver' => env('VAULT_DISK_DRIVER', 'local'),
-            // local driver
-            'root' => storage_path('app/vault'),
+            // local driver stores under storage/app/vault. For s3 the root must be
+            // empty — an absolute local path must never become the S3 key prefix.
+            'root' => env('VAULT_DISK_DRIVER', 'local') === 's3' ? '' : storage_path('app/vault'),
             // s3 driver (residency-flexible; e.g. ap-southeast-1 Singapore)
             'key' => env('AWS_ACCESS_KEY_ID'),
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
