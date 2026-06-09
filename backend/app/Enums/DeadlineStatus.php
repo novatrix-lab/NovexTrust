@@ -21,14 +21,36 @@ enum DeadlineStatus: string
         return (string) __('cockpit.status.'.$this->value);
     }
 
-    /** Tailwind classes for the traffic-light badge. */
+    /** Tailwind classes for the traffic-light pill. */
     public function badgeClasses(): string
     {
         return match ($this) {
-            self::Safe => 'bg-green-100 text-green-800',
-            self::DueSoon => 'bg-amber-100 text-amber-800',
-            self::Overdue => 'bg-red-100 text-red-800',
-            self::Done => 'bg-gray-100 text-gray-600',
+            self::Safe => 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20',
+            self::DueSoon => 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20',
+            self::Overdue => 'bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20',
+            self::Done => 'bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-500/20',
+        };
+    }
+
+    /** Dot colour for the pill / accents. */
+    public function dotClass(): string
+    {
+        return match ($this) {
+            self::Safe => 'bg-emerald-500',
+            self::DueSoon => 'bg-amber-500',
+            self::Overdue => 'bg-rose-500',
+            self::Done => 'bg-slate-400',
+        };
+    }
+
+    /** Accent classes for the dashboard stat card. */
+    public function cardAccent(): string
+    {
+        return match ($this) {
+            self::Safe => 'text-emerald-600 bg-emerald-50',
+            self::DueSoon => 'text-amber-600 bg-amber-50',
+            self::Overdue => 'text-rose-600 bg-rose-50',
+            self::Done => 'text-slate-500 bg-slate-100',
         };
     }
 }
