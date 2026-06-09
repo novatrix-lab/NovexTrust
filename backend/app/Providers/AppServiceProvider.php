@@ -6,10 +6,11 @@ namespace App\Providers;
 
 use App\Extraction\Extractor;
 use App\Extraction\StubExtractor;
+use App\Notifications\Channels\ApiWhatsappChannel;
 use App\Notifications\Channels\EmailChannel;
-use App\Notifications\Channels\TwilioWhatsappChannel;
 use App\Notifications\Channels\WhatsappChannel;
 use App\Notifications\NotificationChannelRegistry;
+use App\Notifications\Whatsapp\MetaCloudWhatsappSender;
 use App\Notifications\Whatsapp\TwilioWhatsappSender;
 use App\Notifications\Whatsapp\WhatsappSender;
 use App\Tenancy\TenantContext;
@@ -56,29 +57,44 @@ class AppServiceProvider extends ServiceProvider
             };
         });
 
-        // WhatsApp transport: real Twilio sender when credentials are configured.
+        // WhatsApp transport: Meta Cloud API or Twilio, per WHATSAPP_PROVIDER.
         $this->app->bind(WhatsappSender::class, function (): WhatsappSender {
-            return new TwilioWhatsappSender(
-                new TwilioClient(config('services.twilio.sid'), config('services.twilio.token')),
-                (string) config('services.twilio.whatsapp_from'),
-                config('services.twilio.whatsapp_content_sid'),
-            );
+            return match (config('services.whatsapp.provider')) {
+                'meta' => new MetaCloudWhatsappSender(
+                    (string) config('services.meta_whatsapp.token'),
+                    (string) config('services.meta_whatsapp.phone_id'),
+                    config('services.meta_whatsapp.template'),
+                    (string) config('services.meta_whatsapp.language', 'en'),
+                ),
+                default => new TwilioWhatsappSender(
+                    new TwilioClient(config('services.twilio.sid'), config('services.twilio.token')),
+                    (string) config('services.twilio.whatsapp_from'),
+                    config('services.twilio.whatsapp_content_sid'),
+                ),
+            };
         });
 
-        // Notification channels (email real; WhatsApp real via Twilio when
-        // configured, else the no-op stub; push is a future drop-in).
+        // Notification channels (email real; WhatsApp real via the configured
+        // provider, else the no-op stub; push is a future drop-in).
         $this->app->singleton(NotificationChannelRegistry::class, function ($app): NotificationChannelRegistry {
             $registry = new NotificationChannelRegistry;
             $registry->register($app->make(EmailChannel::class));
 
             $registry->register(
-                filled(config('services.twilio.sid')) && filled(config('services.twilio.whatsapp_from'))
-                    ? $app->make(TwilioWhatsappChannel::class)
+                $this->whatsappConfigured()
+                    ? $app->make(ApiWhatsappChannel::class)
                     : $app->make(WhatsappChannel::class),
             );
 
             return $registry;
         });
+    }
+
+    private function whatsappConfigured(): bool
+    {
+        return config('services.whatsapp.provider') === 'meta'
+            ? filled(config('services.meta_whatsapp.token')) && filled(config('services.meta_whatsapp.phone_id'))
+            : filled(config('services.twilio.sid')) && filled(config('services.twilio.whatsapp_from'));
     }
 
     /**

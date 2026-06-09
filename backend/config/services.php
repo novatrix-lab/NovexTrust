@@ -37,15 +37,29 @@ return [
         ],
     ],
 
-    // WhatsApp via Twilio (M8 notification channel). When `sid` is set the real
-    // channel is used; otherwise WhatsApp falls back to the no-op stub.
-    // `whatsapp_content_sid` is an approved Twilio Content template (single {{1}}
-    // variable) for production business-initiated messages.
+    // WhatsApp provider selector + per-provider config (M8). The channel is
+    // provider-agnostic; set `whatsapp.provider` to choose the transport.
+    'whatsapp' => [
+        'provider' => env('WHATSAPP_PROVIDER', 'twilio'), // twilio | meta
+    ],
+
+    // Twilio: `whatsapp_content_sid` is an approved Content template (single
+    // {{1}} variable) for production business-initiated messages.
     'twilio' => [
         'sid' => env('TWILIO_SID'),
         'token' => env('TWILIO_AUTH_TOKEN'),
         'whatsapp_from' => env('TWILIO_WHATSAPP_FROM'),
         'whatsapp_content_sid' => env('TWILIO_WHATSAPP_CONTENT_SID'),
+    ],
+
+    // Meta WhatsApp Cloud API (direct, no BSP). `template` is the approved
+    // template name (single {{1}} body variable); leave blank for free-text
+    // (test number / 24h session) sending.
+    'meta_whatsapp' => [
+        'token' => env('META_WHATSAPP_TOKEN'),
+        'phone_id' => env('META_WHATSAPP_PHONE_ID'),
+        'template' => env('META_WHATSAPP_TEMPLATE'),
+        'language' => env('META_WHATSAPP_LANG', 'en'),
     ],
 
 ];

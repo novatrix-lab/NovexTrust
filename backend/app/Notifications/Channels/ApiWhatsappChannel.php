@@ -11,10 +11,11 @@ use App\Notifications\Whatsapp\WhatsappSender;
 use RuntimeException;
 
 /**
- * Real WhatsApp channel (Twilio). Used when Twilio credentials are configured;
- * otherwise the stub {@see WhatsappChannel} is registered instead.
+ * Real WhatsApp channel. Provider-agnostic — it delegates to whichever
+ * {@see WhatsappSender} is bound (Twilio or Meta Cloud API). Used when a
+ * provider is configured; otherwise the no-op {@see WhatsappChannel} stub runs.
  */
-final class TwilioWhatsappChannel implements NotificationChannel
+final class ApiWhatsappChannel implements NotificationChannel
 {
     public function __construct(private readonly WhatsappSender $sender) {}
 

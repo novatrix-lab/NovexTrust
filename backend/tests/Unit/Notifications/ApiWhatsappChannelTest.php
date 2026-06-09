@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Tests\Unit\Notifications;
 
 use App\Notifications\AlertMessage;
-use App\Notifications\Channels\TwilioWhatsappChannel;
+use App\Notifications\Channels\ApiWhatsappChannel;
 use App\Notifications\Whatsapp\WhatsappSender;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
-class TwilioWhatsappChannelTest extends TestCase
+class ApiWhatsappChannelTest extends TestCase
 {
     private function recordingSender(): WhatsappSender
     {
@@ -35,7 +35,7 @@ class TwilioWhatsappChannelTest extends TestCase
     {
         $sender = $this->recordingSender();
 
-        (new TwilioWhatsappChannel($sender))->send($this->message('+971500000000'));
+        (new ApiWhatsappChannel($sender))->send($this->message('+971500000000'));
 
         $this->assertCount(1, $sender->sent);
         $this->assertSame('+971500000000', $sender->sent[0]['to']);
@@ -45,6 +45,6 @@ class TwilioWhatsappChannelTest extends TestCase
     public function test_throws_when_recipient_has_no_phone(): void
     {
         $this->expectException(RuntimeException::class);
-        (new TwilioWhatsappChannel($this->recordingSender()))->send($this->message(null));
+        (new ApiWhatsappChannel($this->recordingSender()))->send($this->message(null));
     }
 }
